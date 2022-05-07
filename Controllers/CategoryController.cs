@@ -1,5 +1,6 @@
 ﻿using Blog.Data;
 using Blog.Models;
+using Blog.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,15 +29,23 @@ namespace Blog.Controllers
 
         [HttpPost("v1/categories")]
         public async Task<IActionResult> PostAsync(
-            [FromBody] Category model,
+            [FromBody] CreateCategoryViewModel model,
             [FromServices] BlogDataContext context)
         {
             try
             {
-                await context.Categories.AddAsync(model);
+                var category = new Category()
+                {
+                    Id = 0,
+                    Posts = null,
+                    Name = model.Name,
+                    Slug = model.Slug.ToLower()
+                };
+
+                await context.Categories.AddAsync(category);
                 await context.SaveChangesAsync();
 
-                return Created($"vi/categories/{model.Id}", model);
+                return Created($"vi/categories/{category.Id}", model);
             } catch (DbUpdateException)
             {
                 return StatusCode(500, "Não foi possivel incluir a categoria");
