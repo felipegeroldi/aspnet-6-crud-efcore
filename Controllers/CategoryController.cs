@@ -15,7 +15,7 @@ namespace Blog.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("vi/categories/{id:int}")]
+        [HttpGet("v1/categories/{id:int}")]
         public async Task<IActionResult> GetByIdAsync(
             [FromRoute] int id,
             [FromServices] BlogDataContext context)
@@ -26,18 +26,27 @@ namespace Blog.Controllers
             return Ok(category);
         }
 
-        [HttpPost("vi/categories")]
+        [HttpPost("v1/categories")]
         public async Task<IActionResult> PostAsync(
             [FromBody] Category model,
             [FromServices] BlogDataContext context)
         {
-            await context.Categories.AddAsync(model);
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.Categories.AddAsync(model);
+                await context.SaveChangesAsync();
 
-            return Created($"vi/categories/{model.Id}", model);
+                return Created($"vi/categories/{model.Id}", model);
+            } catch (DbUpdateException)
+            {
+                return StatusCode(500, "Não foi possivel incluir a categoria");
+            } catch (Exception)
+            {
+                return StatusCode(500, "Falha interna no servidor");
+            }
         }
 
-        [HttpPut("vi/categories/{id:int}")]
+        [HttpPut("v1/categories/{id:int}")]
         public async Task<IActionResult> PostAsync(
             [FromRoute] int id,
             [FromBody] Category model,
@@ -56,7 +65,7 @@ namespace Blog.Controllers
             return Ok(model);
         }
 
-        [HttpDelete("vi/categories/{id:int}")]
+        [HttpDelete("v1/categories/{id:int}")]
         public async Task<IActionResult> DeleteAsync(
             [FromRoute] int id,
             [FromServices] BlogDataContext context)
